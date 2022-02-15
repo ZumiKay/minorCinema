@@ -1,0 +1,11 @@
+import 'package:flutter/material.dart';
+
+Widget get ticketsPages {
+  return Center(child:Container(
+    
+    decoration: const BoxDecoration(
+      image: DecorationImage(
+        image: AssetImage('assets/images/cinema-ticket-movie-template-check-layout-flat-style-realistic-vector-image-133444764.jpg'))
+        ),
+  ));
+}

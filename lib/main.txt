@@ -1,0 +1,285 @@
+import 'dart:ui';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
+import 'package:minor_cinemaapp/book_form.dart';
+import 'package:minor_cinemaapp/detail_page.dart';
+import 'package:minor_cinemaapp/ticket_page.dart';
+
+void main() {
+  runApp(const Minor());
+}
+
+class Minor extends StatefulWidget {
+  const Minor({Key? key}) : super(key: key);
+
+  @override
+  MinorCinema createState() => MinorCinema();
+}
+
+class MinorCinema extends State<Minor> {
+  int _currentIndex = 0;
+  String _selectedButtom = 'NowShowing';
+
+  @override
+  Widget build(BuildContext context) {
+    Widget HomeScreen(BuildContext context) {
+      List<Widget> _pages = <Widget>[bodypage1(context), ticketsPages];
+      return Scaffold(
+        endDrawer: sideMenu(context),
+        backgroundColor: Colors.black54,
+        appBar: navBar,
+        body: _pages[_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          backgroundColor: const Color(0xff575757),
+          onTap: _onTappedtap,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.airplane_ticket_sharp),
+                label: "Tickets",
+                activeIcon: Icon(Icons.airplane_ticket_rounded)),
+          ],
+        ),
+      );
+    }
+
+    return MaterialApp(
+      title: "Minor Cinema",
+      debugShowCheckedModeBanner: false,
+      routes: {
+        '/': (context) => HomeScreen(context),
+        '/reserve': (context) => const BookForm(),
+      },
+    );
+  }
+
+  Widget sideMenu(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          const DrawerHeader(
+            child: Center(
+              child: Text(
+                "Minor Cineplex",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'font1',
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+            decoration: BoxDecoration(color: Colors.black),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text("Home"),
+            onTap: () {
+              setState(() {
+                _currentIndex = 0;
+              });
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.airplane_ticket_sharp),
+            title: const Text("My Tickets"),
+            onTap: () {
+              setState(() {
+                _currentIndex = 1;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onTappedtap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  Widget bodypage1(BuildContext context, {bool active = false}) {
+    final List<Widget> nowShowingMovie = [
+      movieContainer(
+          "https://pics.filmaffinity.com/Hawkeye_TV_Series-650065731-large.jpg",
+          "Haweye",
+          context),
+      movieContainer(
+          'https://static.wikia.nocookie.net/p__/images/7/77/2018A47.png/revision/latest?cb=20200505045026&path-prefix=protagonist',
+          "Hitmen",
+          context),
+      movieContainer(
+          'https://media.comicbook.com/uploads1/2014/11/75-batmen-111238.jpg',
+          "Batmen",
+          context)
+    ];
+    final List<Widget> commingSoon = [
+      movieContainer(
+          'https://media.wired.com/photos/5932d503f682204f73697c96/master/pass/TDK_P3_1280.jpg',
+          'The Dark Knight',
+          context),
+      movieContainer(
+          "https://retrology.net/wp-content/uploads/2021/10/demon.jpg",
+          "Demon Slayer",
+          context)
+    ];
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+          child: Row(
+            children: [
+              FilterButtom('NowShowing', active: true),
+              FilterButtom("Comming Soon")
+            ],
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: _selectedButtom == 'Comming Soon'
+                ? commingSoon
+                : nowShowingMovie,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget FilterButtom(String title, {bool active = false}) {
+    bool active = title == _selectedButtom;
+
+    return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20))),
+        onPressed: () => _onButtomFiltered(title),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                colors: active
+                    ? [Colors.purple, Colors.pink]
+                    : [Colors.grey, Colors.grey]),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            width: 150,
+            height: 50,
+            alignment: Alignment.center,
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 17),
+            ),
+          ),
+        ));
+  }
+
+  void _onButtomFiltered(title) {
+    setState(() {
+      _selectedButtom = title;
+    });
+  }
+}
+
+PreferredSizeWidget get navBar {
+  return AppBar(
+    centerTitle: false,
+    titleSpacing: 0.0,
+    title: Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+      child: Row(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: Image.asset(
+                "assets/images/Logo.jpg",
+                width: 50,
+              ),
+            ),
+          ),
+          Flexible(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const <Widget>[
+              Text(
+                "Minor",
+                style: TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+              Text("Cineplex", style: TextStyle(fontSize: 15))
+            ],
+          ))
+        ],
+      ),
+    ),
+    backgroundColor: Colors.black54,
+  );
+}
+
+void onMenuClick() {
+  print("Clicked");
+}
+
+Widget movieContainer(String imagesrc, String title, BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) =>
+              DetailPage(imageSrc: imagesrc, movietitle: title)));
+    },
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 200,
+          height: 290,
+          margin: const EdgeInsets.fromLTRB(0, 40, 20, 0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white),
+            color: const Color(0xff8D5959),
+            image: DecorationImage(
+                image: imagesrc != ''
+                    ? NetworkImage(imagesrc)
+                    : const NetworkImage(
+                        'https://martialartsplusinc.com/wp-content/uploads/2017/04/default-image-620x600.jpg'),
+                fit: BoxFit.cover),
+          ),
+        ),
+        SizedBox(
+          width: 200,
+          height: 120,
+          child: AutoSizeText(
+            title,
+            maxLines: 2,
+            minFontSize: 10,
+            overflow: TextOverflow.ellipsis,
+            stepGranularity: 10,
+            style: const TextStyle(color: Colors.white, fontSize: 18),
+          ),
+        )
+      ],
+    ),
+  );
+}
+
+Widget bottomNav(int _currentindex) {
+  return BottomNavigationBar(
+    currentIndex: _currentindex,
+    backgroundColor: const Color(0xff575757),
+    items: const <BottomNavigationBarItem>[
+      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+      BottomNavigationBarItem(
+          icon: Icon(Icons.airplane_ticket_sharp),
+          label: "Tickets",
+          activeIcon: Icon(Icons.airplane_ticket_rounded)),
+      BottomNavigationBarItem(
+          icon: Icon(Icons.security_update_warning_rounded), label: "Setting")
+    ],
+  );
+}
