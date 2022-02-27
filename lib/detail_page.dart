@@ -1,17 +1,41 @@
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:minor_cinemaapp/Bloc/cinema_bloc.dart';
+import 'package:minor_cinemaapp/chair_selectPage.dart';
+import 'package:minor_cinemaapp/firestore.dart';
 
-class DetailPage extends StatelessWidget {
-  String imageSrc, movietitle;
-  int dateCount;
-  List<String> time;
-  DetailPage(
+
+class Detail extends StatefulWidget {
+  final String imageSrc, movietitle, moviedate;
+  String? selecteddate;
+  final int dateCount;
+  final List<String> time;
+  Detail(
       {Key? key,
       required this.imageSrc,
       required this.movietitle,
-      required this.time , 
-      required this.dateCount})
+      required this.time,
+      required this.dateCount,
+      required this.moviedate,
+      })
       : super(key: key);
+  @override
+  DetailPage createState() => DetailPage();
+}
+
+class DetailPage extends State<Detail> {
+  final DateTime now = DateTime.now();
+  final DateFormat fomatter = DateFormat('dd-MMM-yyyy');
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    setState(() {
+      widget.selecteddate = fomatter.format(DateTime.now());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +43,7 @@ class DetailPage extends StatelessWidget {
       backgroundColor: Colors.black54,
       appBar: AppBar(
         title: Text(
-          movietitle,
+          widget.movietitle,
           style: const TextStyle(fontFamily: 'font1'),
         ),
         backgroundColor: Colors.black,
@@ -32,7 +56,7 @@ class DetailPage extends StatelessWidget {
           decoration: BoxDecoration(
               border: Border.all(color: Colors.white),
               image: DecorationImage(
-                image: NetworkImage(imageSrc),
+                image: NetworkImage(widget.imageSrc),
                 fit: BoxFit.cover,
               )),
         )),
@@ -46,8 +70,13 @@ class DetailPage extends StatelessWidget {
                 initialSelectedDate: DateTime.now(),
                 selectionColor: Colors.black,
                 selectedTextColor: Colors.white,
-                daysCount: dateCount,
+                daysCount: widget.dateCount,
                 dateTextStyle: const TextStyle(fontFamily: 'font1'),
+                onDateChange: (date) {
+                  setState(() {
+                    widget.selecteddate = fomatter.format(date);
+                  });
+                },
               ),
               decoration: const BoxDecoration(color: Colors.grey),
             )
@@ -67,43 +96,50 @@ class DetailPage extends StatelessWidget {
             ),
           ),
         ),
-        timecon(context, time)
+        timecon(context, widget.time, widget.movietitle, widget.selecteddate ?? '' , widget.imageSrc)
       ]),
     );
   }
 }
 
-Widget timecon(BuildContext context, List<String> time) {
+Widget timecon(
+    BuildContext context, List<String> time, String movietitle, String date , String imagesrc) {
   return Container(
     margin: const EdgeInsets.only(top: 10),
     height: 300,
-    child: GestureDetector(
-      onTap: () => {Navigator.pushNamed(context, '/reserve')},
-      child: GridView.builder(
-          itemCount: time.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 4.0,
-              mainAxisSpacing: 5.0,
-              crossAxisSpacing: 5.0),
-          itemBuilder: (context, index) => SizedBox(
-                child: Container(
-                  
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent,
-                    borderRadius: BorderRadius.circular(20)),
-                  child: Center(
-                    child: Text(
-                      time[index],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontFamily: 'font1'),
-                    ),
-                  ),
-                ),
-              )),
+    child: GridView.builder(
+      itemCount: time.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          childAspectRatio: 4.0,
+          mainAxisSpacing: 5.0,
+          crossAxisSpacing: 5.0),
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => BlocProvider(create: (context) => CinemaBloc() , child: Chair(
+                        movietitle: movietitle,
+                        time: time[index],
+                        date: date,
+                        imgsrc:imagesrc ,
+                      ),)));
+        },
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.pinkAccent,
+              borderRadius: BorderRadius.circular(20)),
+          child: Center(
+            child: Text(
+              time[index],
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.white, fontSize: 15, fontFamily: 'font1'),
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }

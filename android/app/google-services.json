@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "725233907318",
+    "project_id": "minorcinema",
+    "storage_bucket": "minorcinema.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725233907318:android:c6d0af1a4b6aa553ed1157",
+        "android_client_info": {
+          "package_name": "com.example.minor_cinemaapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "725233907318-dolvv81qpsr0gqtm6rckvme55381vpdf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbpuX1AaNQMDmuTtMsWqciPKDKM-w2hf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "725233907318-dolvv81qpsr0gqtm6rckvme55381vpdf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

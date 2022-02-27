@@ -1,5 +1,4 @@
-import 'dart:html';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:minor_cinemaapp/Customs/movie_icon_icons.dart';
@@ -9,9 +8,13 @@ import 'package:minor_cinemaapp/book_form.dart';
 import 'package:minor_cinemaapp/detail_page.dart';
 import 'package:minor_cinemaapp/settings_page.dart';
 import 'package:minor_cinemaapp/ticket_page.dart';
-import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
+import 'package:page_transition/page_transition.dart';
 
-void main() {
+GlobalKey globalKey = GlobalKey();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const Minor());
 }
 
@@ -54,9 +57,11 @@ class MinorCinema extends State<Minor> {
   @override
   Widget build(BuildContext context) {
     //screenWidth = MediaQuery.of(context).size.width;
+
     Widget HomeScreen(BuildContext context) {
-      List<Widget> _pages = <Widget>[bodypage1(context),Setting ,ticketsPages];
+      List<Widget> _pages = <Widget>[bodypage1(context), Setting];
       return Scaffold(
+        key: globalKey,
         endDrawer: sideMenu(context),
         backgroundColor: Colors.black,
 
@@ -82,18 +87,17 @@ class MinorCinema extends State<Minor> {
                     actions: [
                       IconButton(
                         onPressed: () {
-                          setState(() {
-                            _currentIndex = 0;
-                          
-                          });
+                          Navigator.push(
+                              context,
+                              PageTransition(
+                                  child: ticketsPages(context),
+                                  type: PageTransitionType.bottomToTop));
                         },
-                        icon:  const Icon(
+                        icon: const Icon(
                           MovieIcon.ticket_1,
                           color: Colors.white,
-                          
                         ),
                         iconSize: 35,
-                        
                       )
                     ],
                   ))
@@ -125,7 +129,7 @@ class MinorCinema extends State<Minor> {
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => HomeScreen(context),
-        '/reserve': (context) => const BookForm(),
+        
       },
     );
   }
@@ -190,7 +194,7 @@ class MinorCinema extends State<Minor> {
         ),
         Container(
           width: double.infinity,
-          height: 800,
+          height: 808,
           margin: const EdgeInsets.only(top: 20),
           child: moviesList == null
               ? const Center(
@@ -233,11 +237,12 @@ class MinorCinema extends State<Minor> {
       onTap: () {
         _selectedButtom != "Comming Soon"
             ? Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => DetailPage(
+                builder: (context) => Detail(
                       imageSrc: imagesrc,
                       movietitle: title,
                       time: Time,
                       dateCount: datecount,
+                      moviedate: relaease_date,
                     )))
             : '';
       },
@@ -336,7 +341,7 @@ Widget get navBar {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
             child: Image.asset(
-              "assets/images/Logo.jpg",
+              "images/Logo.jpg",
               width: 50,
             ),
           ),
