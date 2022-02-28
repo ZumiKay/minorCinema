@@ -1,27 +1,25 @@
-import 'dart:html';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:minor_cinemaapp/Bloc/cinema_bloc.dart';
 import 'package:minor_cinemaapp/book_form.dart';
 import 'package:minor_cinemaapp/chairmodel.dart';
-import 'package:minor_cinemaapp/main.dart';
 import 'package:minor_cinemaapp/seats.dart';
 
 class Chair extends StatefulWidget {
   final String movietitle;
   final String date;
   final String time;
-  final String imgsrc;
+  final String imgsrc, threater;
 
-  const Chair(
-      {Key? key,
-      required this.movietitle,
-      required this.imgsrc,
-      required this.date,
-      required this.time})
-      : super(key: key);
+  const Chair({
+    Key? key,
+    required this.threater,
+    required this.movietitle,
+    required this.imgsrc,
+    required this.date,
+    required this.time,
+  }) : super(key: key);
 
   @override
   Chairselection createState() => Chairselection();
@@ -30,19 +28,22 @@ class Chair extends StatefulWidget {
 class Chairselection extends State<Chair> {
   Map<int, bool> clickState = {};
   Map<String, int> seats = {};
-  FToast ftoast = FToast();
+  final Stream<QuerySnapshot> db =
+      FirebaseFirestore.instance.collection('tickets').snapshots();
+
   @override
   void initState() {
     super.initState();
     clickState[-1] = false;
-    ftoast = FToast();
-    ftoast.init(context);
+    
   }
 
   @override
   Widget build(BuildContext context) {
     final cinemaBloc = BlocProvider.of<CinemaBloc>(context);
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           widget.movietitle,
@@ -58,17 +59,24 @@ class Chairselection extends State<Chair> {
   }
 
   Widget chairbody(CinemaBloc cinemaBloc) {
-    return Container(
-        width: double.maxFinite,
-        decoration: const BoxDecoration(color: Colors.black),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 70,
+    return ListView(
+          
+        children: 
+          [
+            Container(
+              decoration: const BoxDecoration(color: Colors.black),
+              height: 100,
               width: double.maxFinite,
               child: Column(
                 children: [
+                  Text(
+                    widget.threater,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'font1',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20),
+                  ),
                   Text(
                     widget.date,
                     style: const TextStyle(
@@ -113,14 +121,14 @@ class Chairselection extends State<Chair> {
                   ),
                   Container(
                     margin: const EdgeInsets.only(top: 50),
-                    height: 400,
+                    height: 350,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(height: 400, width: 50, child: chairletter),
                         SizedBox(
                           height: 400,
-                          width: 400,
+                          width: 300,
                           child: Column(
                             children: List.generate(
                                 Chairs.listChair.length,
@@ -188,7 +196,7 @@ class Chairselection extends State<Chair> {
               ),
             ),
             Container(
-              margin: const EdgeInsets.only(top: 50),
+              
               decoration: const BoxDecoration(color: Colors.grey),
               height: 200,
               child: Column(
@@ -258,6 +266,8 @@ class Chairselection extends State<Chair> {
                                           date: widget.date,
                                           seats: state.selectedSeats,
                                           imgsrc: widget.imgsrc,
+                                          price: state.selectedSeats.length * 3,
+                                          threater: widget.threater,
                                         ),
                                       ))
                                   : '';
@@ -276,7 +286,7 @@ class Chairselection extends State<Chair> {
               ),
             )
           ],
-        ));
+        );
   }
 
   Widget get chairletter {

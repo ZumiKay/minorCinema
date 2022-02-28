@@ -5,6 +5,7 @@ class Chairs {
 
   Chairs(
       {required this.rowSeats,required this.seats , required this.freeseats});
+  
   static List<Chairs> listChair = [
     Chairs(rowSeats: 'A' , seats: 3 , freeseats: [1,3]),
     Chairs(rowSeats: 'B', seats: 5, freeseats: [1,2,3,4,5]),

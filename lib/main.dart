@@ -1,18 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:minor_cinemaapp/Customs/movie_icon_icons.dart';
-import 'package:minor_cinemaapp/Customs/my_flutter_app_icons.dart';
 import 'package:minor_cinemaapp/MovieModels.dart';
-import 'package:minor_cinemaapp/book_form.dart';
 import 'package:minor_cinemaapp/detail_page.dart';
 import 'package:minor_cinemaapp/settings_page.dart';
 import 'package:minor_cinemaapp/ticket_page.dart';
 import 'package:page_transition/page_transition.dart';
 
-GlobalKey globalKey = GlobalKey();
-
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const Minor());
@@ -33,19 +28,15 @@ class MinorCinema extends State<Minor> {
   Color iconColor = Colors.white;
   final controller = ScrollController();
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    fetchMovie(
+  Future<void> getMovie() async {
+    await fetchMovie(
             'https://api.themoviedb.org/3/movie/now_playing?api_key=1ab1c1e489ff7b73b8421d135545954d&language=en-US&page=1')
         .then((value) {
       setState(() {
         moviesList = value;
       });
     });
-    fetchMovie(
+    await fetchMovie(
             "https://api.themoviedb.org/3/movie/upcoming?api_key=1ab1c1e489ff7b73b8421d135545954d&language=en-US&page=1")
         .then((value) {
       setState(() {
@@ -55,13 +46,19 @@ class MinorCinema extends State<Minor> {
   }
 
   @override
+  void initState() {
+    
+    super.initState();
+    getMovie();
+  }
+
+  @override
   Widget build(BuildContext context) {
     //screenWidth = MediaQuery.of(context).size.width;
 
     Widget HomeScreen(BuildContext context) {
       List<Widget> _pages = <Widget>[bodypage1(context), Setting];
       return Scaffold(
-        key: globalKey,
         endDrawer: sideMenu(context),
         backgroundColor: Colors.black,
 
@@ -70,6 +67,7 @@ class MinorCinema extends State<Minor> {
         //   preferredSize: Size.fromHeight(50.0),
         // ),
         //_pages[_currentIndex]
+        resizeToAvoidBottomInset: true,
         body: NestedScrollView(
           floatHeaderSlivers: true,
           headerSliverBuilder: (BuildContext context, bool innerBoxisScrolled) {
@@ -90,11 +88,11 @@ class MinorCinema extends State<Minor> {
                           Navigator.push(
                               context,
                               PageTransition(
-                                  child: ticketsPages(context),
+                                  child: ticket(),
                                   type: PageTransitionType.bottomToTop));
                         },
                         icon: const Icon(
-                          MovieIcon.ticket_1,
+                          Icons.airplane_ticket,
                           color: Colors.white,
                         ),
                         iconSize: 35,
@@ -129,7 +127,6 @@ class MinorCinema extends State<Minor> {
       debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => HomeScreen(context),
-        
       },
     );
   }
@@ -161,7 +158,7 @@ class MinorCinema extends State<Minor> {
             },
           ),
           ListTile(
-            leading: const Icon(MyFlutterApp.ticket_alt),
+            leading: const Icon(Icons.airplane_ticket),
             title: const Text("My Tickets"),
             onTap: () {
               setState(() {
@@ -194,7 +191,7 @@ class MinorCinema extends State<Minor> {
         ),
         Container(
           width: double.infinity,
-          height: 808,
+          height: MediaQuery.of(context).size.height - 250,
           margin: const EdgeInsets.only(top: 20),
           child: moviesList == null
               ? const Center(
@@ -205,7 +202,7 @@ class MinorCinema extends State<Minor> {
                   itemCount: 5,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.6095,
+                    childAspectRatio: .5,
                   ),
                   itemBuilder: (context, index) {
                     return _selectedButtom != 'Comming Soon'
@@ -215,14 +212,16 @@ class MinorCinema extends State<Minor> {
                             context,
                             ['12:00', '11:00'],
                             5,
-                            '${moviesList![index].release_date}')
+                            '${moviesList![index].release_date}',
+                            'Hall ${index + 1}')
                         : movieContainer(
                             'https://image.tmdb.org/t/p/w500${upcommingmovieList![index].posterPath}',
                             '${upcommingmovieList![index].title}',
                             context,
                             ['12:00', '11:00'],
                             5,
-                            '${upcommingmovieList![index].release_date}');
+                            '${upcommingmovieList![index].release_date}',
+                            '');
                   }),
         )
       ],
@@ -230,20 +229,23 @@ class MinorCinema extends State<Minor> {
   }
 
   Widget movieContainer(String imagesrc, String title, BuildContext context,
-      List<String> Time, int datecount, String relaease_date) {
+      List<String> Time, int datecount, String relaease_date, String threater) {
     var date = DateTime.now();
     String dateformated = DateFormat('MMM-dd-yyyy').format(date);
     return GestureDetector(
       onTap: () {
         _selectedButtom != "Comming Soon"
-            ? Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => Detail(
-                      imageSrc: imagesrc,
-                      movietitle: title,
-                      time: Time,
-                      dateCount: datecount,
-                      moviedate: relaease_date,
-                    )))
+            ? Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => Detail(
+                          imageSrc: imagesrc,
+                          movietitle: title,
+                          time: Time,
+                          dateCount: datecount,
+                          moviedate: relaease_date,
+                          theater: threater,
+                        )),
+              )
             : '';
       },
       child: Column(
@@ -264,7 +266,7 @@ class MinorCinema extends State<Minor> {
           ),
           Container(
             height: 60,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             width: double.maxFinite,
             decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3)),
             child: Column(
@@ -364,9 +366,7 @@ Widget get navBar {
   );
 }
 
-void onMenuClick() {
-  print("Clicked");
-}
+
 
 Widget bottomNav(int _currentindex) {
   return BottomNavigationBar(
@@ -375,9 +375,9 @@ Widget bottomNav(int _currentindex) {
     items: const <BottomNavigationBarItem>[
       BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
       BottomNavigationBarItem(
-          icon: Icon(MyFlutterApp.ticket_alt),
+          icon: Icon(Icons.airplane_ticket),
           label: "Tickets",
-          activeIcon: Icon(MyFlutterApp.ticket_alt)),
+          activeIcon: Icon(Icons.airplane_ticket)),
       BottomNavigationBarItem(
           icon: Icon(Icons.security_update_warning_rounded), label: "Setting")
     ],

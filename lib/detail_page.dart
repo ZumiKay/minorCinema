@@ -1,26 +1,26 @@
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:minor_cinemaapp/Bloc/cinema_bloc.dart';
 import 'package:minor_cinemaapp/chair_selectPage.dart';
-import 'package:minor_cinemaapp/firestore.dart';
-
 
 class Detail extends StatefulWidget {
-  final String imageSrc, movietitle, moviedate;
+  final String imageSrc, movietitle, moviedate, theater;
   String? selecteddate;
   final int dateCount;
   final List<String> time;
-  Detail(
-      {Key? key,
-      required this.imageSrc,
-      required this.movietitle,
-      required this.time,
-      required this.dateCount,
-      required this.moviedate,
-      })
-      : super(key: key);
+  Detail({
+    Key? key,
+    required this.theater,
+    required this.imageSrc,
+    required this.movietitle,
+    required this.time,
+    required this.dateCount,
+    required this.moviedate,
+  }) : super(key: key);
   @override
   DetailPage createState() => DetailPage();
 }
@@ -28,10 +28,13 @@ class Detail extends StatefulWidget {
 class DetailPage extends State<Detail> {
   final DateTime now = DateTime.now();
   final DateFormat fomatter = DateFormat('dd-MMM-yyyy');
-
+  final Stream db =
+      FirebaseFirestore.instance.collection('tickets').snapshots();
+  List<String> bookedseats = [];
+  
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     setState(() {
       widget.selecteddate = fomatter.format(DateTime.now());
     });
@@ -40,6 +43,7 @@ class DetailPage extends State<Detail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.black54,
       appBar: AppBar(
         title: Text(
@@ -48,18 +52,19 @@ class DetailPage extends State<Detail> {
         ),
         backgroundColor: Colors.black,
       ),
-      body: Column(children: [
-        Center(
-            child: Container(
+      body: Stack(children: [
+        
+        Container(
           width: 200,
           height: 300,
+          margin: EdgeInsets.only(left: MediaQuery.of(context).size.width / 2 - 100),
           decoration: BoxDecoration(
               border: Border.all(color: Colors.white),
               image: DecorationImage(
                 image: NetworkImage(widget.imageSrc),
                 fit: BoxFit.cover,
               )),
-        )),
+        ),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -82,31 +87,65 @@ class DetailPage extends State<Detail> {
             )
           ],
         ),
-        const SizedBox(
-          width: 500,
+         Positioned(
+          bottom: 200,
+          child: 
+         SizedBox(
+          width: MediaQuery.of(context).size.width,
           height: 60,
-          child: Card(
+          child: const Card(
             color: Colors.grey,
-            margin: EdgeInsets.only(top: 30),
+            
             child: Center(
               child: Text(
                 "2D KH/ENG",
-                style: TextStyle(fontFamily: 'font1', fontSize: 20),
+                style: TextStyle(
+                    fontFamily: 'font1',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
-        ),
-        timecon(context, widget.time, widget.movietitle, widget.selecteddate ?? '' , widget.imageSrc)
+        )
+        )
+        ,
+        Positioned(
+          top: 600,
+          child:  
+        Container(
+          margin:const EdgeInsets.only(left: 10),
+          child: Text(
+            widget.theater,
+            style: const TextStyle(
+                color: Colors.white,
+                fontFamily: 'font1',
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
+          ),
+        ))
+       ,
+       
+       timecon(
+          context,
+          widget.time,
+          widget.movietitle,
+          widget.selecteddate ?? '',
+          widget.imageSrc,
+          widget.theater,
+          bookedseats,
+        )
+       
+        ,
       ]),
     );
   }
 }
 
-Widget timecon(
-    BuildContext context, List<String> time, String movietitle, String date , String imagesrc) {
+Widget timecon(BuildContext context, List<String> time, String movietitle,
+    String date, String imagesrc, String threater, List<String> bookedseats) {
   return Container(
-    margin: const EdgeInsets.only(top: 10),
-    height: 300,
+    margin: const EdgeInsets.only(top: 650),
+    height: 200,
     child: GridView.builder(
       itemCount: time.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -119,12 +158,17 @@ Widget timecon(
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => BlocProvider(create: (context) => CinemaBloc() , child: Chair(
-                        movietitle: movietitle,
-                        time: time[index],
-                        date: date,
-                        imgsrc:imagesrc ,
-                      ),)));
+                builder: (context) => BlocProvider(
+                  create: (context) => CinemaBloc(),
+                  child: Chair(
+                    movietitle: movietitle,
+                    time: time[index],
+                    date: date,
+                    imgsrc: imagesrc,
+                    threater: threater,
+                  ),
+                ),
+              ));
         },
         child: Container(
           decoration: BoxDecoration(

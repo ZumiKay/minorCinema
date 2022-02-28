@@ -1,11 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 part 'cinema_event.dart';
 part 'cinema_state.dart';
 
 class CinemaBloc extends Bloc<CinemaEvent, CinemaState> {
+  
   CinemaBloc() : super(CinemaState()) {
     on<OnSelectedSeatsEvent>(_onSelectedSeats);
+    
   }
   List<String> seats = [];
 

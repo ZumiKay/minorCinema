@@ -47,6 +47,8 @@ dependencies:
   firebase_core: ^1.12.0
   flutter_bloc: ^8.0.1
   fluttertoast: ^8.0.9
+  uuid: ^3.0.6
+  shared_preferences: ^2.0.13
 
 dev_dependencies:
   flutter_test:
@@ -110,12 +112,7 @@ flutter:
       fonts:
         - asset: assets/Fonts/RobotoMono-SemiBold.ttf
           style: normal
-    - family:  MyFlutterApp
-      fonts:
-       - asset: assets/Fonts/MyFlutterApp.ttf  
-    - family:  MovieIcon
-      fonts:
-       - asset: assets/Fonts/MovieIcon.ttf
+    
         
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
